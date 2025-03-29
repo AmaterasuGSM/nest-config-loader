@@ -52,9 +52,6 @@ export class AppService {
     // Get a required configuration value (throws if not found)
     const apiKey = this.configService.get<string>("api.key");
 
-    // Get an optional configuration value
-    const debug = this.configService.getOptional<boolean>("app.debug");
-
     return `App running on port ${port}`;
   }
 }

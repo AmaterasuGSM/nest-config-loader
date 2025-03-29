@@ -30,12 +30,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/AmaterasuGSM/nestjs-config-loader"
+    "url": "https://github.com/AmaterasuGSM/nest-config-loader"
   },
   "bugs": {
-    "url": "https://github.com/AmaterasuGSM/nestjs-config-loader"
+    "url": "https://github.com/AmaterasuGSM/nest-config-loader"
   },
-  "homepage": "https://github.com/AmaterasuGSM/nestjs-config-loader#readme",
+  "homepage": "https://github.com/AmaterasuGSM/nest-config-loader#readme",
   "peerDependencies": {
     "@nestjs/common": "^9.0.0 || ^10.0.0",
     "@nestjs/core": "^9.0.0 || ^10.0.0"
