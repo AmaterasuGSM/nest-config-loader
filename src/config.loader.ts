@@ -2,7 +2,7 @@ import fs from "fs";
 import yaml from "js-yaml";
 import merge from "lodash.merge";
 import { basename, extname, join, resolve } from "path";
-import PropertiesReader from "properties-reader";
+import { parse } from "dot-properties";
 import { tsImport } from "tsx/esm/api";
 
 interface Config {
@@ -14,7 +14,8 @@ export const GlobalConfig: Config = {};
 const configLoaders = {
   ".yaml": (path: string) => yaml.load(fs.readFileSync(path, "utf8")) || {},
   ".yml": (path: string) => yaml.load(fs.readFileSync(path, "utf8")) || {},
-  ".properties": (path: string) => PropertiesReader(path).getAllProperties(),
+  ".properties": (path: string) =>
+    parse(fs.readFileSync(path, "utf8"), true) || {},
   ".ts": async (path: string) => {
     try {
       const module = await tsImport(path, import.meta.url);

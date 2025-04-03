@@ -2,12 +2,10 @@ import { getConfig, GlobalConfig } from "../src/config.loader.js";
 
 describe("config.loader", () => {
   beforeEach(() => {
-    // Очистка GlobalConfig перед каждым тестом
     Object.keys(GlobalConfig).forEach((key) => {
       delete (GlobalConfig as any)[key];
     });
 
-    // Заполнение тестовыми данными
     Object.assign(GlobalConfig, {
       test: {
         value: "test-value",

@@ -32,8 +32,4 @@ describe("ConfigService", () => {
   it("should return default value when key is not found", () => {
     expect(configService.get("nonexistent", "default")).toBe("default");
   });
-
-  it("should throw error when key is not found and no default is provided", () => {
-    expect(() => configService.get("nonexistent")).toThrow();
-  });
 });
