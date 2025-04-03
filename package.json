@@ -1,6 +1,6 @@
 {
   "name": "nest-config-loader",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "A flexible configuration module for NestJS with support for various file formats, including TypeScript in ESM projects",
   "type": "module",
   "main": "dist/index.js",
