@@ -1,6 +1,7 @@
 import fs from "fs";
 import yaml from "js-yaml";
 import merge from "lodash.merge";
+import * as dotenv from "dotenv";
 import { basename, extname, join, resolve } from "path";
 import { parse } from "dot-properties";
 import { tsImport } from "tsx/esm/api";
@@ -72,9 +73,19 @@ export const loadConfig = async (): Promise<Config> => {
     const configs = await Promise.all(
       dirs.map((dir) => loadDirectory(dir, env))
     );
-    const merged = configs.reduce((acc, config) => merge(acc, config), {});
-    Object.assign(GlobalConfig, merged);
-    return merged;
+    const mergedConfigFile = configs.reduce(
+      (acc, config) => merge(acc, config),
+      {}
+    );
+
+    const envConfig = {
+      ...process.env,
+      ...(dotenv.config().parsed || {}),
+    };
+    const finalConfig = merge({}, mergedConfigFile, envConfig);
+
+    Object.assign(GlobalConfig, finalConfig);
+    return finalConfig;
   } catch (error) {
     console.error("Config loading failed:", error);
     throw error;
