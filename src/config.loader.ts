@@ -1,16 +1,16 @@
+import { NestConfigTypes } from "./NestConfigTypes.js";
+
+import { parse } from "dot-properties";
+import * as dotenv from "dotenv";
 import fs from "fs";
 import yaml from "js-yaml";
 import merge from "lodash.merge";
-import * as dotenv from "dotenv";
 import { basename, extname, join, resolve } from "path";
-import { parse } from "dot-properties";
 import { tsImport } from "tsx/esm/api";
+import { Get, Paths } from "type-fest";
 
-interface Config {
-  [key: string]: unknown;
-}
-
-export const GlobalConfig: Config = {};
+interface Config extends NestConfigTypes {}
+export const GlobalConfig: Config = {} as Config;
 
 const configLoaders = {
   ".yaml": (path: string) => yaml.load(fs.readFileSync(path, "utf8")) || {},
@@ -20,12 +20,10 @@ const configLoaders = {
   ".ts": async (path: string) => {
     try {
       const module = await tsImport(path, import.meta.url);
-
       if (!module) {
         console.warn(`Empty TS config at ${path}`);
         return {};
       }
-
       return module.default || module;
     } catch (error) {
       console.error(`Error loading TS config at ${path}:`, error);
@@ -34,9 +32,26 @@ const configLoaders = {
   },
 };
 
-const loadDirectory = async (dir: string, env: string): Promise<Config> => {
-  const config: Config = {};
+export function getConfig<P extends Paths<NestConfigTypes>>(
+  path: P
+): Get<NestConfigTypes, P>;
+export function getConfig<P extends Paths<NestConfigTypes>>(
+  path: P,
+  defaultValue: Get<NestConfigTypes, P>
+): Get<NestConfigTypes, P>;
+export function getConfig<T = any>(path: string, defaultValue?: T): T;
+export function getConfig(path: string, defaultValue?: unknown): unknown {
+  const value = path.split(".").reduce<unknown>((currentObj, partKey) => {
+    if (typeof currentObj !== "object" || currentObj === null) {
+      return undefined;
+    }
+    return (currentObj as Record<string, unknown>)[partKey];
+  }, GlobalConfig);
+  return value !== undefined ? value : defaultValue;
+}
 
+const loadDirectory = async (dir: string, env: string): Promise<Config> => {
+  const config: Config = {} as Config;
   const loadFiles = fs.readdirSync(dir).filter((file) => {
     const baseName = basename(file, extname(file));
     const ext = extname(file);
@@ -58,7 +73,6 @@ const loadDirectory = async (dir: string, env: string): Promise<Config> => {
       );
     }
   }
-
   return config;
 };
 
@@ -73,16 +87,16 @@ export const loadConfig = async (): Promise<Config> => {
     const configs = await Promise.all(
       dirs.map((dir) => loadDirectory(dir, env))
     );
-    const mergedConfigFile = configs.reduce(
+    const mergedFileConfig = configs.reduce(
       (acc, config) => merge(acc, config),
-      {}
+      {} as Config
     );
 
     const envConfig = {
       ...process.env,
       ...(dotenv.config().parsed || {}),
     };
-    const finalConfig = merge({}, mergedConfigFile, envConfig);
+    const finalConfig = merge({}, mergedFileConfig, envConfig);
 
     Object.assign(GlobalConfig, finalConfig);
     return finalConfig;
@@ -90,17 +104,6 @@ export const loadConfig = async (): Promise<Config> => {
     console.error("Config loading failed:", error);
     throw error;
   }
-};
-
-export const getConfig = <T>(key: string, defaultValue?: T): T | undefined => {
-  const value = key.split(".").reduce<unknown>((currentObj, partKey) => {
-    if (typeof currentObj !== "object" || currentObj === null) {
-      return undefined;
-    }
-    return (currentObj as Record<string, unknown>)[partKey];
-  }, GlobalConfig);
-
-  return value !== undefined ? (value as T) : defaultValue;
 };
 
 await loadConfig();

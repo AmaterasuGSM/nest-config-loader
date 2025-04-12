@@ -5,6 +5,12 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "files": [
     "dist"
   ],
@@ -45,7 +51,8 @@
     "dotenv": "^16.4.7",
     "js-yaml": "^4.1.0",
     "lodash.merge": "^4.6.2",
-    "tsx": "^4.19.3"
+    "tsx": "^4.19.3",
+    "type-fest": "^4.39.1"
   },
   "devDependencies": {
     "@nestjs/common": "^10.0.0",
